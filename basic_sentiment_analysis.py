@@ -138,11 +138,8 @@ def sentiment_score(review):
     return sum([sentence_score(sentence, None, 0.0) for sentence in review])
 
 if __name__ == "__main__":
-    text = """What can I say about this place. The staff of the restaurant is 
-    nice and the eggplant is not bad. Apart from that, very uninspired food, 
-    lack of atmosphere and too expensive. I am a staunch vegetarian and was 
-    sorely dissapointed with the veggie options on the menu. Will be the last 
-    time I visit, I recommend others to avoid."""
+    text = """uh yeah a friend of mine was annoying me and i just
+    cut them off"""
 
     splitter = Splitter()
     postagger = POSTagger()
@@ -150,16 +147,23 @@ if __name__ == "__main__":
                                     'dicts/inc.yml', 'dicts/dec.yml', 'dicts/inv.yml'])
 
     splitted_sentences = splitter.split(text)
-    pprint(splitted_sentences)
+    #pprint(splitted_sentences)
 
     pos_tagged_sentences = postagger.pos_tag(splitted_sentences)
-    pprint(pos_tagged_sentences)
+    #pprint(pos_tagged_sentences)
 
-    dict_tagged_sentences = dicttagger.tag(pos_tagged_sentences)
-    pprint(dict_tagged_sentences)
+    #dict_tagged_sentences = dicttagger.tag(pos_tagged_sentences)
+    #pprint(dict_tagged_sentences)
 
-    print("analyzing sentiment...")
-    score = sentiment_score(dict_tagged_sentences)
-    print(score)
+    #print("analyzing sentiment...")
+    #score = sentiment_score(dict_tagged_sentences)
+    score = sentiment_score(pos_tagged_sentences)
+    #print(score)
+    if score > 5:
+        print "positive"
+    elif score == 5:
+        print "neutal"
+    else:
+        print "negative"
 
 
