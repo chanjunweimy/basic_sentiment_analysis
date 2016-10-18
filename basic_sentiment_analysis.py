@@ -14,6 +14,29 @@ import yaml
 import sys
 import os
 import re
+import csv 
+from os import listdir 
+from os.path import isfile, join
+
+def constant(f):
+    def fset(self, value):
+        raise TypeError
+    def fget(self):
+        return f()
+    return property(fget, fset)
+
+class Const(object):
+    @constant
+    def POSITIVE():
+        return 1
+        
+    @constant
+    def NEUTRAL():
+        return 0
+        
+    @constant
+    def NEGATIVE():
+        return -1
 
 class Splitter(object):
 
@@ -137,10 +160,8 @@ def sentence_score(sentence_tokens, previous_token, acum_score):
 def sentiment_score(review):
     return sum([sentence_score(sentence, None, 0.0) for sentence in review])
 
-if __name__ == "__main__":
-    text = """uh yeah a friend of mine was annoying me and i just
-    cut them off"""
-
+    
+def calculate_sentiment_score(text):
     splitter = Splitter()
     postagger = POSTagger()
     dicttagger = DictionaryTagger([ 'dicts/positive.yml', 'dicts/negative.yml', 
@@ -154,16 +175,52 @@ if __name__ == "__main__":
 
     #dict_tagged_sentences = dicttagger.tag(pos_tagged_sentences)
     #pprint(dict_tagged_sentences)
-
+    
     #print("analyzing sentiment...")
+    score = sum([sentence_score(sentence, None, 0.0) for sentence in pos_tagged_sentences])
     #score = sentiment_score(dict_tagged_sentences)
-    score = sentiment_score(pos_tagged_sentences)
+    #score = sentiment_score(pos_tagged_sentences)
     #print(score)
+    
+    CONST = Const()
+    
     if score > 5:
-        print "positive"
+        return CONST.POSITIVE
     elif score == 5:
-        print "neutal"
+        return CONST.NEUTRAL
     else:
-        print "negative"
+        return CONST.NEGATIVE
 
+def get_sentiments_from_files(mypath, outputfilename):
+    filenames = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+    sentiment_scores = []
+    for filename in filenames:
+        file = open(mypath + filename, 'r')
+        sentences = file.readlines()
+        file.close();
+        sentiment_score = sum([calculate_sentiment_score(sentence) for sentence in sentences])
+        sentiment_score /= len(sentences)
+            
+        sentiment_scores.append(sentiment_score)
+
+    outputfile = open(outputfilename, "w")
+    [outputfile.write(str(sentiment_score)  + "\n") for sentiment_score in sentiment_scores]
+    outputfile.close();
+        
+if __name__ == "__main__":
+    #debugpath = "transcripts/debug/"
+    #debugfilename = "sentiment_debug.txt"
+    #get_sentiments_from_files(debugpath, debugfilename)
+    
+    trainpath = "transcripts/train/";
+    trainfilename = "sentiment_train.txt";
+    get_sentiments_from_files(trainpath, trainfilename)
+    
+    print "done training"
+    
+    devpath = "transcripts/dev/";
+    devfilename = "sentiment_dev.txt";
+    get_sentiments_from_files(devpath, devfilename)
+    
+    print "done dev"
 
